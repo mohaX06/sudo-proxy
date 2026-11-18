@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Liquid glass demo</title>
+  <style>
+    /* ---------- Demo page (stand-in for your site) ---------- */
+    :root { --cream: #FAF7F2; --orange: #D97757; --ink: #1F1612; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--ink);
+      /* A busy background so the refraction has something to bend. */
+      background:
+        radial-gradient(circle 520px at 12% 18%, #f0a07f 0, rgba(240,160,127,0) 70%),
+        radial-gradient(circle 460px at 88% 30%, #e9c46a 0, rgba(233,196,106,0) 70%),
+        var(--cream);
+    }
+    .hero { padding: 160px 24px 48px; text-align: center; }
+    .hero h1 { font-size: clamp(44px, 8vw, 104px); line-height: .95; letter-spacing: -.03em; margin: 0 0 16px; }
+    .hero p { font-size: 19px; margin: 0; }
+    .stripes {
+      background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46'%3E%3Cpath d='M-12 12L12-12M0 46L46 0M34 58L58 34' stroke='%231F1612' stroke-opacity='.85' stroke-width='12'/%3E%3C/svg%3E"),
+        radial-gradient(circle 560px at 50% 100%, #D97757 0, rgba(217,119,87,0) 70%);
+    }
+    .pricing {
+      position: relative; max-width: 1080px; margin: 0 auto; padding: 80px 24px 200px;
+      display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+    .site-nav { position: fixed; top: 16px; left: 16px; right: 16px; z-index: 10; max-width: 1080px; margin: 0 auto; }
+    .nav-inner { display: flex; align-items: center; gap: 24px; padding: 14px 22px; }
+    .nav-inner .logo { font-weight: 800; margin-right: auto; }
+    .nav-inner a { color: var(--ink); text-decoration: none; font-weight: 500; }
+    .nav-inner .nav-cta { background: var(--ink); color: var(--cream); padding: 8px 16px; border-radius: 999px; }
+    .card-body { padding: 28px; display: flex; flex-direction: column; gap: 12px; height: 100%; }
+    .card-body h2 { margin: 0; font-size: 20px; }
+    .price { font-size: 44px; font-weight: 800; letter-spacing: -.02em; }
+    .price small { font-size: 16px; font-weight: 500; }
+    .card-body ul { margin: 0; padding-left: 18px; line-height: 1.7; flex: 1; }
+    .card-body .btn { text-align: center; padding: 12px; border-radius: 999px; background: var(--ink); color: var(--cream); text-decoration: none; font-weight: 600; }
+    .badge { align-self: start; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; background: var(--orange); color: #fff; padding: 4px 10px; border-radius: 999px; }
+    @media (max-width: 640px) { .nav-inner a:not(.nav-cta):not(.logo) { display: none; } }
+
+    /* ---------- Liquid glass panels ---------- */
+    .lg-panel {
+      position: relative;
+      isolation: isolate;   /* keeps the library's z-index:-1 canvas inside the panel */
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .lg-panel > canvas { box-shadow: 0 10px 30px rgba(60, 30, 10, .14) !important; }
+    /* Readability layer: a light frosted wash between the glass and the text. */
+    .lg-scrim {
+      position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+      background: rgba(255, 255, 255, var(--glass-scrim, .45));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .55);
+    }
+    .lg-content { position: relative; height: 100%; }
+    @media (prefers-reduced-transparency: reduce) { .lg-scrim { background: rgba(255, 255, 255, .92); } }
+
+    /* ---------- Tuning panel (demo only) ---------- */
+    .tuner { position: fixed; right: 16px; bottom: 16px; z-index: 20; width: 240px; padding: 14px 16px;
+      background: #fff; border-radius: 14px; box-shadow: 0 6px 24px rgba(0,0,0,.12); font-size: 13px; display: grid; gap: 10px; }
+    .tuner label { display: grid; gap: 4px; }
+    .tuner span { display: flex; justify-content: space-between; }
+    .tuner input { width: 100%; accent-color: var(--orange); }
+  </style>
+</head>
+<body>
+  <header class="site-nav" data-glass data-glass-radius="22">
+    <nav class="nav-inner" aria-label="Main">
+      <a class="logo" href="#">Brand</a>
+      <a href="#">Product</a>
+      <a href="#">Pricing</a>
+      <a href="#">Docs</a>
+      <a class="nav-cta" href="#">Sign in</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Simple pricing.</h1>
+    <p>Scroll and watch the glass bend whatever is behind it.</p>
+  </section>
+
+  <div class="stripes">
+  <section class="pricing">
+    <article class="card" data-glass data-glass-radius="24">
+      <div class="card-body">
+        <h2>Starter</h2>
+        <div class="price">$0 <small>/ month</small></div>
+        <ul><li>1 project</li><li>Community support</li><li>Basic analytics</li></ul>
+        <a class="btn" href="#">Start free</a>
+      </div>
+    </article>
+    <article class="card" data-glass data-glass-radius="24">
+      <div class="card-body">
+        <span class="badge">Popular</span>
+        <h2>Pro</h2>
+        <div class="price">$19 <small>/ month</small></div>
+        <ul><li>Unlimited projects</li><li>Email support</li><li>Advanced analytics</li></ul>
+        <a class="btn" href="#">Go Pro</a>
+      </div>
+    </article>
+    <article class="card" data-glass data-glass-radius="24">
+      <div class="card-body">
+        <h2>Team</h2>
+        <div class="price">$49 <small>/ month</small></div>
+        <ul><li>Everything in Pro</li><li>5 seats included</li><li>Priority support</li></ul>
+        <a class="btn" href="#">Contact sales</a>
+      </div>
+    </article>
+  </section>
+  </div>
+
+  <aside class="tuner" data-html2canvas-ignore aria-label="Glass tuning">
+    <strong>Tune glass</strong>
+    <label><span>Blur <code id="v-blur"></code></span><input id="blur" type="range" min="1" max="15" step="0.5"></label>
+    <label><span>Tint <code id="v-tint"></code></span><input id="tint" type="range" min="0" max="1" step="0.05"></label>
+    <label><span>Readability wash <code id="v-scrim"></code></span><input id="scrim" type="range" min="0" max="0.9" step="0.05"></label>
+  </aside>
+
+  <!-- Liquid Glass JS (+ html2canvas, which it uses to capture the page) -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/dashersw/liquid-glass-js@78cb6ccb0b9987bb60a88b14ccbd13a9e6e8ab2a/container.js"></script>
+  <script>
+    // Glass settings shared by every panel. Read once when each panel's WebGL starts.
+    window.glassControls = {
+      blurRadius: 8,       // 1-15
+      edgeIntensity: 0.01,
+      rimIntensity: 0.05,
+      baseIntensity: 0.01,
+      edgeDistance: 0.15,
+      rimDistance: 0.8,
+      baseDistance: 0.1,
+      cornerBoost: 0.02,
+      rippleEffect: 0.1,
+    }
+    const GLASS_TINT = 0.2   // 0-1
+    const GLASS_SCRIM = 0.45 // white wash behind text, 0-1
+
+    // Turn an existing element into a liquid glass panel. The element keeps its tag
+    // and its children; the library's own <div> goes inside it, behind the content.
+    function makeGlass(host) {
+      const glass = new Container({
+        type: 'rounded',
+        borderRadius: Number(host.dataset.glassRadius || 24),
+        tintOpacity: GLASS_TINT,
+      })
+      const scrim = document.createElement('div')
+      scrim.className = 'lg-scrim'
+      const content = document.createElement('div')
+      content.className = 'lg-content'
+      content.append(...host.childNodes)
+      glass.element.classList.add('lg-panel')
+      glass.element.append(scrim, content)
+      host.append(glass.element)
+      return glass
+    }
+
+    // Snapshot of the page for the glass to refract. The library's own capture removes
+    // the glass panels from its copy of the page, which collapses in-flow panels (like
+    // pricing cards) and shifts everything below them. Hiding them keeps the layout.
+    function captureSnapshot() {
+      return html2canvas(document.body, {
+        scale: 1, useCORS: true, backgroundColor: null,
+        onclone: doc => doc.querySelectorAll('.glass-container').forEach(el => { el.style.visibility = 'hidden' }),
+      })
+    }
+
+    function setUniform(name, value) {
+      Container.instances.forEach(c => {
+        const gl = c.gl_refs.gl
+        if (!gl) return
+        gl.uniform1f(c.gl_refs[name], value)
+        c.render?.()
+      })
+    }
+
+    // The library captures the page once. Re-capture after a resize so the glass
+    // keeps lining up with what is behind it.
+    let resizeTimer
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(async () => {
+        Container.instances.forEach(c => c.updateSizeFromDOM())
+        const snapshot = await captureSnapshot()
+        Container.pageSnapshot = snapshot
+        Container.instances.forEach(c => {
+          const gl = c.gl_refs.gl
+          if (!gl) return
+          gl.bindTexture(gl.TEXTURE_2D, c.gl_refs.texture)
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, snapshot)
+          gl.uniform2f(c.gl_refs.textureSizeLoc, snapshot.width, snapshot.height)
+          c.render?.()
+        })
+      }, 250)
+    })
+
+    window.addEventListener('load', () => {
+      document.documentElement.style.setProperty('--glass-scrim', GLASS_SCRIM)
+      // The library snapshots the page the moment the first Container is created,
+      // before panel text has moved into the glass. Hold that off, build every
+      // panel, then take one snapshot and start the glass.
+      Container.isCapturing = true
+      document.querySelectorAll('[data-glass]').forEach(makeGlass)
+      captureSnapshot().then(snapshot => {
+        Container.pageSnapshot = snapshot
+        Container.isCapturing = false
+        Container.waitingForSnapshot.splice(0).forEach(c => c.initWebGL())
+      })
+
+      // Demo tuning panel: delete this block on your real site.
+      const bind = (id, initial, apply) => {
+        const input = document.getElementById(id), out = document.getElementById('v-' + id)
+        input.value = initial; out.textContent = initial
+        input.addEventListener('input', () => { out.textContent = input.value; apply(Number(input.value)) })
+      }
+      bind('blur', window.glassControls.blurRadius, v => setUniform('blurRadiusLoc', v))
+      bind('tint', GLASS_TINT, v => setUniform('tintOpacityLoc', v))
+      bind('scrim', GLASS_SCRIM, v => document.documentElement.style.setProperty('--glass-scrim', v))
+    })
+  </script>
+</body>
+</html>
