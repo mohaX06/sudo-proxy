@@ -4,8 +4,15 @@ body { margin: 0; background: var(--cream); color: var(--ink);
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
 
 .hero { position: relative; width: 100%; min-height: 88vh; overflow: hidden;
-  display: grid; place-items: center; padding: 96px 24px; isolation: isolate; }
-.hero-content { max-width: 640px; text-align: center; }
+  display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; gap: 24px;
+  padding: 96px max(24px, calc((100% - 1160px) / 2)); isolation: isolate; }
+.hero-content { max-width: 560px; grid-column: 1; grid-row: 1; }
+.hero-object { grid-column: 2; grid-row: 1; height: min(56vh, 520px); width: 100%; }
+@media (max-width: 760px) {
+  .hero { grid-template-columns: 1fr; padding-top: 48px; text-align: center; }
+  .hero-content { grid-row: 2; margin: 0 auto; }
+  .hero-object { grid-column: 1; grid-row: 1; height: 260px; }
+}
 .eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: 13px; color: #8a4a33; margin: 0 0 12px; }
 h1 { font-size: clamp(40px, 7vw, 76px); line-height: 1.02; letter-spacing: -.02em; margin: 0 0 20px; }
 .lede { font-size: 19px; line-height: 1.5; margin: 0 0 32px; color: #4a3a32; }
@@ -14,7 +21,7 @@ h1 { font-size: clamp(40px, 7vw, 76px); line-height: 1.02; letter-spacing: -.02e
 
 .below { max-width: 720px; margin: 0 auto; padding: 96px 24px 160px; }
 
-.tuner { position: fixed; right: 16px; bottom: 16px; width: 240px; padding: 14px 16px;
+.tuner { position: fixed; right: 16px; bottom: 16px; width: 240px; max-height: calc(100vh - 32px); overflow: auto; padding: 14px 16px;
   background: rgba(255,255,255,.85); backdrop-filter: blur(8px); border-radius: 14px;
   box-shadow: 0 6px 24px rgba(0,0,0,.08); font-size: 13px; display: grid; gap: 10px; z-index: 10; }
 .tuner label { display: grid; gap: 4px; }
